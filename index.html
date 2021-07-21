@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MineSweeper</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body onload="initGame()">
+    <h1 class="lives"> Lives: 3</h1>
+    <button class="smiley" onclick="resetGame()">😀</button>
+    <div class="hints">💡</div>
+    <!-- <button class="hint">💡</button>
+    <button class="hint">💡</button> -->
+    <span class="timer">00:00</span>
+    <p>Best Score:</h1>
+    <span class="score"></span>
+    <div class="levels">
+        <button onclick="changeLevel('easy')">Beginner</button>
+        <button onclick="changeLevel('medium')">Medium</button>
+        <button onclick="changeLevel('expert')">Expert</button>
+    </div>
+    <div class="board">
+
+    </div>
+    <script src="utils/utils.js" ></script>
+    <script src="js/board.js" ></script>
+    <script src="js/game.js" ></script>
+    <script src="js/localStorage.js" ></script>
+</body>
+<footer>
+    <p>Ravid Hamami</p>
+</footer>
+</html>
