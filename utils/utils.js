@@ -66,15 +66,15 @@ function getRandomInteger(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
 
-// copy mat
 function copyMat(mat) {
     var newMat = [];
     for (var i = 0; i < mat.length; i++) {
-        newMat[i] = []
-        // newMat[i] = mat[i].slice();
-        for (var j = 0; j < mat[0].length; j++) {
-            newMat[i][j] = mat[i][j];
+        var row = [];
+        for (var j = 0; j < mat.length; j++) {
+            var cell = Object.assign({}, mat[i][j]);
+            row.push(cell);
         }
+        newMat.push(row);
     }
     return newMat;
 }
@@ -102,28 +102,28 @@ function isEmptyCell(coord) {
 }
 
 // timer
-function startTimer() {
-    // renderTimer();
-    gStartTime = Date.now();
-    gTimerInterval = setInterval(function () {
-        var msDiff = Date.now() - gStartTime;
-        var secs = '' + parseInt((msDiff / 1000) % 60);
-        if (secs.length === 1) secs = '0' + secs;
+// function startTimer() {
+//     // renderTimer();
+//     gStartTime = Date.now();
+//     gTimerInterval = setInterval(function () {
+//         var msDiff = Date.now() - gStartTime;
+//         var secs = '' + parseInt((msDiff / 1000) % 60);
+//         if (secs.length === 1) secs = '0' + secs;
 
-        var min = '' + parseInt(msDiff / 1000 / 60);
-        if (min.length === 1) min = '0' + min;
+//         var min = '' + parseInt(msDiff / 1000 / 60);
+//         if (min.length === 1) min = '0' + min;
 
-        var strMsDiff = '' + msDiff;
+//         var strMsDiff = '' + msDiff;
 
-        var miliSecs = strMsDiff.charAt(strMsDiff.length - 3) +
-            strMsDiff.charAt(strMsDiff.length - 2);
+//         var miliSecs = strMsDiff.charAt(strMsDiff.length - 3) +
+//             strMsDiff.charAt(strMsDiff.length - 2);
 
-        if (miliSecs.length === 1) miliSecs = '0' + miliSecs;
-        console.log(miliSecs);
+//         if (miliSecs.length === 1) miliSecs = '0' + miliSecs;
+//         console.log(miliSecs);
 
-        var passedTime = `${min}:${secs}.${miliSecs}`;
-        var elTimer = document.querySelector('.timer');
-        elTimer.innerText = passedTime;
-    },
-        10);
-}
+//         var passedTime = `${min}:${secs}.${miliSecs}`;
+//         var elTimer = document.querySelector('.timer');
+//         elTimer.innerText = passedTime;
+//     },
+//         10);
+// }

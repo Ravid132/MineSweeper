@@ -40,5 +40,4 @@ function highestScore(level, score) {
             break;
     }
     document.querySelector('.score').innerText = score;
-
 }
