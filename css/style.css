@@ -4,6 +4,7 @@
     max-width: 100%;
     overflow-x: hidden;
 }
+
 body{
     height: 100%;
     width: 100%;
@@ -36,10 +37,12 @@ body{
     border: 1px solid yellow;
 }
 
+/* hidden cell */
 .hide{
         background: linear-gradient(0deg,rgba(34,193,195,1)0%,rgba(45,175,253,1)100%);
 }
 
+/* open cell */
 .reveal{
      background-color: rgb(48, 48, 48);
     color: red;
@@ -111,13 +114,30 @@ body{
 }
 
 footer{
-background-color: grey;
+    background-color: grey;
     width: 100%;
     text-align: center;
     margin: 0;
     padding: 0;
     position: absolute;
     opacity: 0.7;
+}
+
+.modal{
+    display: none;
+    border: 2px solid black;
+    width: 30%;
+    margin: auto;
+    position: relative;
+    background-color: red;
+}
+
+.modal button{
+    top: 0;
+    right: 0;
+    border-radius: 2px;
+    position: absolute;
+    background-color: #363636;
 }
 
 .fade{
@@ -127,6 +147,7 @@ background-color: grey;
     animation-iteration-count:1;
     animation-fill-mode:forwards;
 }
+
 
 @keyframes fadeIn {
     from{

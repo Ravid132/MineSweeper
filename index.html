@@ -23,6 +23,7 @@
         <button onclick="changeLevel('easy')">Beginner</button>
         <button onclick="changeLevel('medium')">Medium</button>
         <button onclick="changeLevel('expert')">Expert</button>
+        <button class="manual" onclick="setManualMode()">Manual Mode</button>
     </div>
     <div class="buttons">
         <button class="safe-click-btn" onclick="safeClick()">Safe Click</button>
@@ -30,7 +31,10 @@
     </div>
     <p>Hints:</p>
     <div class="hints">💡</div>
-
+    <div class="modal">
+        <button onclick="closeModal()">x</button>
+        <h2>You Won</h2>
+    </div>
     <div class="board">
     </div>
 

@@ -15,10 +15,15 @@ var gGame = {
     hints: 3,
     isHintOn: false,
     safeClick: 3,
+    isManualOn: false
 };
 // var gCell;
 var gTimerInterval;
 var gState = [];
+var gManualMode = false;
+var gManualMinesCount = gLevel.MINES;
+var winningAudio = new Audio('sounds/winning.wav');
+var losingAudio = new Audio('sounds/lose.wav');
 
 // init variables
 function initGame() {
@@ -31,10 +36,15 @@ function initGame() {
         hints: 3,
         isHintOn: false,
         safeClick: 3,
+        isManualOn: false
     };
+
+    gManualMinesCount = gLevel.MINES;
+    gManualMode = false;
     gState = [];
     renderHints();
     document.querySelector('.lives').innerHTML = 'Lives: ' + gGame.lives;
+    document.querySelector('.manual').innerText = 'Manual Mode';
     renderSmiley(false);
     gBoard = createMatrix();
     renderBoard(gBoard);
@@ -59,19 +69,19 @@ function setMinesNegsCout(board) {
             board[i][j].minesAroundCount = getAllNegs({ i, j }, board, gLevel.SIZE);
         }
     }
-
-    console.log(board);
 }
 
 //handle left click on cell
 function cellClicked(i, j) {
-    if (!gGame.shownCount) {
-        console.log('game starts');
+    if (gGame.isManualOn) {
+        addMinesManually(i, j);
+        return;
+    }
+    if (!gGame.shownCount && !gGame.isManualOn && !gManualMode) {
         gGame.isOn = true;
         beginGame(i, j);
     }
     if (gGame.isHintOn) {
-        console.log('into revealHint');
         revealHint({ i: i, j: j });
         return;
     }
@@ -97,6 +107,7 @@ function cellClicked(i, j) {
 function cellMarked(ev, i, j) {
     ev.preventDefault();
     if (!gGame.isOn) return;
+    if (gGame.isManualOn) return;
     if (gBoard[i][j].isShown) return;
     gBoard[i][j].isMarked = (!gBoard[i][j].isMarked);
     (gBoard[i][j].isMarked) ? gGame.markedCount++ : gGame.markedCount--;
@@ -104,7 +115,6 @@ function cellMarked(ev, i, j) {
 
     if (checkGameOver()) {
         finishGame(true);
-        console.log('WINNER!');
     }
     updateState();
 }
@@ -114,9 +124,14 @@ function finishGame(isVictory) {
     if (isVictory) {
         highestScore(gLevel.type, gGame.secsPassed);
         renderSmiley(true);
+        winningAudio.play();
+        // alert('You Win!');
+        openModal('You Won!');
         gGame.isOn = false;
     } else {
         gGame.isOn = false;
+        losingAudio.play();
+        openModal('You Lost :(');
         revealMines();
     }
     clearInterval(gTimerInterval);
@@ -126,14 +141,14 @@ function finishGame(isVictory) {
 function buildBoard(posI, posJ) {
     var board = createMatrix(gLevel.SIZE);
     var emptyCells = getEmptyCells(board, posI, posJ); //array of all empty cells in board
-    console.log(emptyCells);
+
     for (var i = 0; i < gLevel.MINES; i++) {
         var randPos = getRandomIntegerInclusive(0, emptyCells.length - 1);
         var iIdx = emptyCells[randPos].i;
         var jIdx = emptyCells[randPos].j;
-        console.log('mine at:', emptyCells[randPos].i, emptyCells[randPos].j);
         board[iIdx][jIdx].isMine = true;
         emptyCells.splice(randPos, 1);
+        console.log('mine at', iIdx, jIdx);
     }
     return board;
 }
@@ -159,15 +174,13 @@ function createMatrix() {
 //Game ends when all mines are marked, and all the other cells are shown
 function checkGameOver() {
     var numOfCellsWithNums = (gLevel.SIZE * gLevel.SIZE) - gLevel.MINES;
-    console.log('nums of cells', numOfCellsWithNums);
-    console.log('Count', gGame.shownCount);
-    console.log('gGame.markedCount', gGame.markedCount);
     return gGame.shownCount === numOfCellsWithNums && gGame.markedCount === gLevel.MINES;
 }
 
 //reset game
 function resetGame() {
     initGame();
+    gManualMode = false;
 }
 
 //changing level
@@ -190,6 +203,7 @@ function changeLevel(value) {
             break;
     }
     gLevel.type = value;
+    renderScore(value);
     clearInterval(gTimerInterval);
     initGame();
 }
@@ -201,7 +215,6 @@ function activeHint(hint) {
         return;
     }
     gGame.isHintOn = true;
-    console.log('This is the hint', hint);
     hint.style.display = 'none';
 }
 
@@ -209,7 +222,7 @@ function activeHint(hint) {
 function showTimer(startTime) {
     var diff = Math.floor((Date.now() - startTime) / 1000);
     var elTimer = document.querySelector('.timer');
-    elTimer.innerText = diff;
+    elTimer.innerHTML = (diff > 9 ? diff : '0' + diff)
     gGame.secsPassed = diff;
 }
 
@@ -222,7 +235,6 @@ function safeClick() {
     }
     var randCellPos = getRandomCell(gBoard);
     var elSafeCell = document.querySelector(`[data-i="${randCellPos.i}"][data-j="${randCellPos.j}"]`);
-    console.log('safe cell', elSafeCell);
     elSafeCell.classList.remove('hide');
     elSafeCell.classList.add('safe-click');
 
@@ -263,11 +275,16 @@ function undo() {
     gGame.lives = prevMove.lives;
     gGame.safeClick = prevMove.safeClick;
     gGame.hints = prevMove.hints;
+    gGame.isManualOn = prevMove.manualMode;
+    gManualMode = prevMove.manualMode;
 
     renderBoard(gBoard);
     renderHints();
     renderLives();
     renderSmiley(false);
+    if (gLevel.MINES > gManualMinesCount) gManualMinesCount++;
+    document.querySelector('.manual').innerText = 'mines left:' + gManualMinesCount;
+    if (!gBoard.isManualOn) document.querySelector('.manual').innerText = 'Manual Mode';
 }
 
 //putting current move in gState array to remember the move
@@ -278,7 +295,9 @@ function updateState() {
         markedCount: gGame.markedCount,
         lives: gGame.lives,
         safeClick: gGame.safeClick,
-        hints: gGame.hints
+        hints: gGame.hints,
+        manualMode: gGame.isManualOn,
+        gManualMode: gManualMode.isManualOn
     });
 }
 
@@ -297,4 +316,46 @@ function recursiveOpenCells(i, j) {
             recursiveOpenCells(row, col);
         }
     }
+}
+
+function addMinesManually(i, j) {
+    // debugger;
+    updateState();
+    if (gBoard[i][j].isMine) return;
+    gManualMinesCount--;
+    document.querySelector('.manual').innerText = 'mines left:' + gManualMinesCount;
+    gBoard[i][j].isMine = true;
+    setMinesNegsCout(gBoard);
+    renderBoard(gBoard);
+    if (gManualMinesCount === 0) {
+        gGame.isManualOn = false;
+        return;
+    }
+}
+
+function setManualMode() {
+    updateState();
+    gManualMinesCount = gLevel.MINES;
+    document.querySelector('.manual').innerText = 'mines left:' + gManualMinesCount;
+    gGame.isManualOn = true;
+    gManualMode = true;
+    gGame.isOn = true;
+    gBoard = createMatrix(gLevel.SIZE);
+    renderBoard(gBoard);
+    var startTime = new Date();
+    gTimerInterval = setInterval(showTimer, 1000, startTime);
+}
+
+function openModal(text) {
+    var elModal = document.querySelector('.modal');
+    var elH2 = document.querySelector('.modal h2');
+    elH2.innerText = text;
+    elModal.style.display = 'block';
+    setTimeout(function () { elModal.style.display = 'none'; }, 5000);
+
+}
+
+function closeModal() {
+    var elModal = document.querySelector('.modal');
+    elModal.style.display = 'none';
 }
